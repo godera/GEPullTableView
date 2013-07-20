@@ -496,9 +496,9 @@
 #pragma mark - Manual Controlled Methods
 - (void)didFinishedRefreshWithNewData:(BOOL)hasNewData
 {
-//    if (hasNewData) {
-//        [self.tableView reloadData];
-//    }
+    if (hasNewData) {
+        [self.tableView reloadData];
+    }
     
     self.refreshHeaderView.lastUpdatedDate = [NSDate date];
     [self.refreshHeaderView scrollViewDidFinishedLoading:self.tableView];

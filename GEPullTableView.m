@@ -118,8 +118,11 @@
 
 - (void)scrollViewPullDownRefreshSimulation
 {
-    [self.tableView setContentOffset:CGPointMake(0, -THRESHOLD) animated:NO];
-    [self scrollViewDidEndDragging:self.tableView willDecelerate:YES];
+    [UIView animateWithDuration:0.25 animations:^{
+        self.tableView.contentOffset = CGPointMake(0 , -THRESHOLD);
+    } completion:^(BOOL finished) {
+        [self scrollViewDidEndDragging:self.tableView willDecelerate:YES];
+    }];
 }
 
 #pragma mark - GEPullViewDelegate

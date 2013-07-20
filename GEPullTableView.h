@@ -21,7 +21,7 @@
 
 @property (assign, nonatomic) id<GEPullTableViewDelegate,UITableViewDataSource,UITableViewDelegate> delegate;
 
-@property (nonatomic, retain) UITableView* tableView;
+@property (retain, nonatomic) UITableView* tableView;
 
 @property (retain, nonatomic) UIView* nothingView;
 @property (retain, nonatomic) UIImage* nothingImage;//if there is no nothingView,nothingImage will be used.

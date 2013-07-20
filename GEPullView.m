@@ -129,14 +129,16 @@ typedef enum{
 -(void)willMoveToSuperview:(UIView *)newSuperview
 {
     if (self.superview == nil) {
+        
         if (self.arrowImageName && self.textColor) {
             [self configViaArrowImageName:self.arrowImageName textColor:self.textColor];
         }else{
             [self configViaArrowImageName:ARROW_IMAGE_NAME textColor:TEXT_COLOR];
         };
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshLastUpdatedDate) name:NOTE_PERSISTANT_TIMER object:nil];
+        
     }
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(refreshLastUpdatedDate) name:NOTE_PERSISTANT_TIMER object:nil];
 }
 
 #pragma mark - Setters
@@ -328,7 +330,7 @@ typedef enum{
 
 -(void)footerFrameReset
 {
-    if (self && self.superview) {
+    if (self.superview) {
         UIScrollView* table = (UIScrollView*)self.superview;
         CGFloat contentHeight = table.contentSize.height;
         CGFloat tableHeight = table.bounds.size.height;

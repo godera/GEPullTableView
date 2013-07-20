@@ -14,8 +14,6 @@
 @property (nonatomic, assign) float originY;
 @property (nonatomic, assign) BOOL noGoods;
 
-@property (nonatomic, assign) BOOL needShowHideToolBar;//should be set yes when next page loading was done ever ok or faild
-
 @end
 
 
@@ -23,10 +21,13 @@
 
 - (void)dealloc
 {
+    [_tableView removeObserver:self forKeyPath:@"contentSize" context:NULL];
+    [_tableView release];
+    
+    [_nothingView release];
     [_nothingImage release];
     [_bottomBar release];
-    
-    [_tableView release];
+
     [super dealloc];
 }
 
@@ -36,42 +37,48 @@
     if (self) {
         // Initialization code
         self.originY = 0.0f;
-        self.needShowHideToolBar = YES;
     }
     return self;
 }
 
 -(void)willMoveToSuperview:(UIView *)newSuperview
 {
-    UITableView* table = [[[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain] autorelease];
-    table.dataSource = self;
-    table.delegate = self;
-    table.backgroundColor = [UIColor clearColor];
-    table.separatorStyle = UITableViewCellSeparatorStyleNone;
-    [self addSubview:table];
-    self.tableView = table;
-
-    ////header
-    GEPullView *refreshHeaderView = [[[GEPullView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, self.tableView.bounds.size.width, self.tableView.bounds.size.height)]autorelease];
-    refreshHeaderView.delegate = self;
-    refreshHeaderView.position = ViewPositon_Top;
-    [self.tableView addSubview:refreshHeaderView];
-    self.refreshHeaderView = refreshHeaderView;
+    if (self.superview == nil) {
+        
+        UITableView* table = [[[UITableView alloc] initWithFrame:self.bounds style:UITableViewStylePlain] autorelease];
+        table.dataSource = self;
+        table.delegate = self;
+        table.backgroundColor = [UIColor clearColor];
+        table.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [self addSubview:table];
+        self.tableView = table;
+        
+        ////header
+        GEPullView *refreshHeaderView = [[[GEPullView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.bounds.size.height, self.tableView.bounds.size.width, self.tableView.bounds.size.height)]autorelease];
+        refreshHeaderView.delegate = self;
+        refreshHeaderView.position = ViewPositon_Top;
+        [self.tableView addSubview:refreshHeaderView];
+        self.refreshHeaderView = refreshHeaderView;
+        
+        ////footer
+        GEPullView *nextPageFooterView = [[[GEPullView alloc] initWithFrame:CGRectZero]autorelease];
+        nextPageFooterView.delegate = self;
+        nextPageFooterView.position = ViewPositon_Bottom;
+        [self.tableView addSubview:nextPageFooterView];
+        self.nextPageFooterView = nextPageFooterView;
+        
+        [self.tableView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionNew context:NULL];
+        
+    }
     
-    ////footer
-    GEPullView *nextPageFooterView = [[[GEPullView alloc] initWithFrame:CGRectZero]autorelease];
-    nextPageFooterView.delegate = self;
-    nextPageFooterView.position = ViewPositon_Bottom;
-    [self.tableView addSubview:nextPageFooterView];
-    self.nextPageFooterView = nextPageFooterView;
-    
-    [self.tableView addObserver:self forKeyPath:@"contentSize" options:NSKeyValueObservingOptionNew context:nil];    
 }
 
 #pragma mark - KVO for self.tableView.contentSize
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    [self.nextPageFooterView footerFrameReset];
+    if (object == self.tableView) {
+        [self.nextPageFooterView footerFrameReset];
+    }
 }
 
 #pragma mark - UIScrollViewDelegate Methods
@@ -136,7 +143,7 @@
 -(void)GEPullViewDidTriggerLoadNextPage:(GEPullView *)footerView
 {
     [self hideView:self.bottomBar Animated:YES];
-//    self.needShowHideToolBar = NO;
+
     if (self.delegate && [self.delegate respondsToSelector:@selector(GEPullTableViewDidTriggerLoadNextPage:)]) {
         [self.delegate GEPullTableViewDidTriggerLoadNextPage:footerView];
     }
@@ -489,9 +496,9 @@
 #pragma mark - Manual Controlled Methods
 - (void)didFinishedRefreshWithNewData:(BOOL)hasNewData
 {
-    if (hasNewData) {
-        [self.tableView reloadData];
-    }
+//    if (hasNewData) {
+//        [self.tableView reloadData];
+//    }
     
     self.refreshHeaderView.lastUpdatedDate = [NSDate date];
     [self.refreshHeaderView scrollViewDidFinishedLoading:self.tableView];

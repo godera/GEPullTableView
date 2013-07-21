@@ -278,7 +278,7 @@ typedef enum{
     
     if (self.position == ViewPositon_Bottom) {
         
-        if (scrollView.contentOffset.y + scrollView.frame.size.height > scrollView.contentSize.height + THRESHOLD && _state != GEPullStatus_Loading) {
+        if (scrollView.contentOffset.y + scrollView.frame.size.height > scrollView.contentSize.height + THRESHOLD && _state != GEPullStatus_Loading && scrollView.contentSize.height > 0) {
             
             [self setState:GEPullStatus_Loading];
             
